@@ -51,8 +51,6 @@ public class Home extends AppCompatActivity {
     private ArrayList<String> mDataset;
     private ArrayList<String >mKeyset;
 
-    private ProgressBar progressBar;
-
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference myRef = database.getReference().child("Messages");
 
@@ -122,6 +120,7 @@ public class Home extends AppCompatActivity {
     public void load_chats(){
 
         myRef.addChildEventListener(new ChildEventListener() {
+
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
@@ -140,6 +139,13 @@ public class Home extends AppCompatActivity {
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                int index = mKeyset.indexOf(dataSnapshot.getKey());
+
+                mDataset.remove(index);
+                mKeyset.remove(index);
+
+                mAdapter.notifyDataSetChanged();
 
             }
 

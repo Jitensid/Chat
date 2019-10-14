@@ -58,7 +58,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
                 final String message_key = mKeyset.get(position);
 
                 final AlertDialog show = new AlertDialog.Builder(view.getContext())
-                        .setTitle("Erase Message ?")
+                        .setTitle("Erase Message")
                         .setMessage("Do you really want to delete the message ?")
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -66,11 +66,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
                             public void onClick(DialogInterface dialogInterface, int i) {
 
                                 myRef.child(message_key).removeValue();
-
-                                mDataset.remove(position);
-                                mKeyset.remove(position);
-
-                                notifyDataSetChanged();
 
                             }
                         })
