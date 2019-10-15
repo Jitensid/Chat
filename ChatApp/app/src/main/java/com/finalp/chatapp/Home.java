@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -39,8 +40,6 @@ import java.util.Map;
 
 public class Home extends AppCompatActivity {
 
-    private FirebaseAuth mAuth;
-
     private Button logout;
     private FloatingActionButton sent;
     private EditText input_message;
@@ -48,11 +47,13 @@ public class Home extends AppCompatActivity {
     private RecyclerView mrecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private RecyclerView.Adapter mAdapter;
-    private ArrayList<String> mDataset;
+    private ArrayList<Message> mDataset;
     private ArrayList<String >mKeyset;
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference myRef = database.getReference().child("Messages");
+    private FirebaseAuth mAuth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,13 +62,14 @@ public class Home extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         mAuth = FirebaseAuth.getInstance();
+        final FirebaseUser user = mAuth.getCurrentUser();
 
         mrecyclerView = findViewById(R.id.recycler_view);
-        mDataset = new ArrayList<String>();
+        mDataset = new ArrayList<Message>();
         mKeyset = new ArrayList<String>();
 
-        mDataset.add("Welcome to the DoubtRoom!!");
-        mDataset.add("Welcome to the DoubtRoom!!");
+        mDataset.add(new Message("jiten@gmail.com","Welcome to DoubtRoom"));
+        mDataset.add(new Message("jiten@gmail.com","Welcome to the DoubtRoom!!"));
 
         mKeyset.add("Random");
         mKeyset.add("Random");
@@ -76,7 +78,7 @@ public class Home extends AppCompatActivity {
 
         mLayoutManager = new LinearLayoutManager(this);
         mrecyclerView.setHasFixedSize(true);
-        mAdapter = new MainAdapter(mDataset, mKeyset);
+        mAdapter = new MainAdapter(mDataset, mKeyset, user);
         mrecyclerView.setLayoutManager(mLayoutManager);
         mrecyclerView.setAdapter(mAdapter);
         mrecyclerView.scrollToPosition(mDataset.size() - 1);
@@ -95,9 +97,13 @@ public class Home extends AppCompatActivity {
                     return;
                 }
 
+                String user_email = user.getEmail();
+
                 String key = myRef.push().getKey();
 
-                myRef.child(key).setValue(input_message.getText().toString());
+                Message new_message = new Message(user_email, input_message.getText().toString());
+
+                myRef.child(key).setValue(new_message);
                 input_message.setText("");
                 mAdapter.notifyDataSetChanged();
                 mrecyclerView.scrollToPosition(mDataset.size()-1);
@@ -124,7 +130,10 @@ public class Home extends AppCompatActivity {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
-                String existing_message = dataSnapshot.getValue(String.class);
+                //String existing_message = dataSnapshot.getValue(String.class);
+
+                Message existing_message = dataSnapshot.getValue(Message.class);
+
                 mDataset.add(existing_message);
                 mKeyset.add(dataSnapshot.getKey());
                 mAdapter.notifyDataSetChanged();
